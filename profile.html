@@ -16,7 +16,6 @@
         .nav-link { display: block; padding: 10px 0; color: #333; text-decoration: none; border-bottom: 1px solid #eee; }
         .nav-link:hover { color: #0056b3; }
         
-        /* Стили для строк заказов */
         .order-item {
             display: flex;
             justify-content: space-between;
@@ -24,13 +23,12 @@
             border-bottom: 1px dashed #ddd;
         }
         .order-item:last-child { border-bottom: none; }
-        .order-date { color: #999; font-size: 0.85rem; }
+        .order-date { color: #999; font-size: 0.85rem; margin-left: 10px; }
     </style>
 </head>
 <body style="background: #f4f7f6;">
 
     <div class="profile-wrapper">
-    <!-- Боковая панель -->
         <div class="sidebar">
             <h3 id="side-username" style="border-bottom: 2px solid #054181; padding-bottom: 10px; margin-bottom: 15px;">Загрузка...</h3>
             <nav>
@@ -39,7 +37,6 @@
                 <button class="logout-btn" onclick="logout()">Выйти из системы</button>
             </nav>
         </div>
-        <!-- Основная часть -->
         <div class="main-content">
             <div class="user-info">
                 <h2>Добро пожаловать, <span id="display-name">Гость</span>!</h2>
@@ -66,6 +63,8 @@
     </div>
 
     <script>
+        const API_URL = "https://energomarket-e1k3.onrender.com";
+
         document.addEventListener('DOMContentLoaded', async () => {
             const user = localStorage.getItem('currentUser');
             if (!user) {
@@ -73,42 +72,37 @@
                 return;
             }
 
-            // Устанавливаем имя сразу
             document.getElementById('side-username').innerText = user;
             document.getElementById('display-name').innerText = user;
 
             try {
-                // Запрос к твоему Python серверу
-                const response = await fetch(`http://127.0.0.1:5000/get_profile?username=${user}`);
+                // Обращаемся к Render вместо локального сервера
+                const response = await fetch(`${API_URL}/get_profile?username=${user}`);
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Обновляем баланс
-                    document.getElementById('balance').innerText =
-
-
-`${data.balance.toLocaleString()} ₽`;
+                    document.getElementById('balance').innerText = `${data.balance.toLocaleString()} ₽`;
                     
-                    // Обновляем количество покупок
-                    document.getElementById('orders-count').innerText = `${data.orders.length} шт.`;
+                    // В твоем Python коде список покупок называется 'history'
+                    const history = data.history || [];
+                    document.getElementById('orders-count').innerText = `${history.length} шт.`;
 
-                    // Рендерим список заказов
                     const log = document.getElementById('activity-log');
-                    if (data.orders.length === 0) {
+                    if (history.length === 0) {
                         log.innerHTML = '<p style="color: #666; font-style: italic;">У вас пока нет совершенных покупок.</p>';
                     } else {
-                        log.innerHTML = data.orders.map(order => `
+                        // Используем 'item_name' и 'price', как в твоей базе данных
+                        log.innerHTML = history.map(order => `
                             <div class="order-item">
                                 <div>
-                                    <strong>${order.name}</strong>
-
+                                    <strong>${order.item_name}</strong>
                                     <span class="order-date">${new Date(order.date).toLocaleString('ru-RU')}</span>
                                 </div>
                                 <div style="color: #28a745; font-weight: bold;">
                                     ${order.price.toLocaleString()} ₽
                                 </div>
                             </div>
-                        `).join('');
+                        `).reverse().join(''); // Реверс, чтобы новые покупки были сверху
                     }
                 }
             } catch (error) {
