@@ -46,11 +46,11 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="stat-card">
                         <h4>Текущий баланс</h4>
-                        <p id="balance">0 ₽</p>
+                        <p id="balance">Загрузка...</p>
                     </div>
                     <div class="stat-card">
                         <h4>Мои покупки</h4>
-                        <p id="orders-count">0 товаров</p>
+                        <p id="orders-count">0 шт.</p>
                     </div>
                 </div>
 
@@ -63,7 +63,10 @@
     </div>
 
     <script>
-        const API_URL = "https://energomarket-e1k3.onrender.com";
+        // УМНОЕ ОПРЕДЕЛЕНИЕ АДРЕСА (чтобы не было 0 ₽)
+        const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+            ? "http://127.0.0.1:10000" 
+            : "https://energomarket-e1k3.onrender.com";
 
         document.addEventListener('DOMContentLoaded', async () => {
             const user = localStorage.getItem('currentUser');
@@ -77,37 +80,38 @@
 
             try {
                 const response = await fetch(`${API_URL}/get_profile?username=${user}`);
+                if (!response.ok) throw new Error("Сервер вернул ошибку");
+                
                 const data = await response.json();
 
-                if (response.ok) {
-                    // Баланс из твоего app.py
-                    document.getElementById('balance').innerText = `${data.balance.toLocaleString()} ₽`;
-                    
-                    // Список покупок (в app.py это 'orders')
-                    const orders = data.orders || [];
-                    document.getElementById('orders-count').innerText = `${orders.length} шт.`;
+                // Отображаем баланс
+                const userBalance = data.balance !== undefined ? data.balance : 0;
+                document.getElementById('balance').innerText = `${userBalance.toLocaleString()} ₽`;
+                
+                // Отображаем количество покупок
+                const orders = data.orders || [];
+                document.getElementById('orders-count').innerText = `${orders.length} шт.`;
 
-                    const log = document.getElementById('activity-log');
-                    if (orders.length === 0) {
-                        log.innerHTML = '<p style="color: #666; font-style: italic;">У вас пока нет совершенных покупок.</p>';
-                    } else {
-                        // Используем 'name' (как в строке 105 твоего app.py)
-                        log.innerHTML = orders.map(order => `
-                            <div class="order-item">
-                                <div>
-                                    <strong>${order.name}</strong>
-                                    <span class="order-date">${new Date(order.date).toLocaleString('ru-RU')}</span>
-                                </div>
-                                <div style="color: #28a745; font-weight: bold;">
-                                    ${order.price.toLocaleString()} ₽
-                                </div>
+                const log = document.getElementById('activity-log');
+                if (orders.length === 0) {
+                    log.innerHTML = '<p style="color: #666; font-style: italic;">У вас пока нет совершенных покупок.</p>';
+                } else {
+                    log.innerHTML = orders.map(order => `
+                        <div class="order-item">
+                            <div>
+                                <strong>${order.name}</strong>
+                                <span class="order-date">${new Date(order.date).toLocaleString('ru-RU')}</span>
                             </div>
-                        `).join(''); // Убрал reverse, так как в app.py уже есть ORDER BY date DESC
-                    }
+                            <div style="color: #28a745; font-weight: bold;">
+                                ${order.price.toLocaleString()} ₽
+                            </div>
+                        </div>
+                    `).join('');
                 }
             } catch (error) {
                 console.error("Ошибка:", error);
-                document.getElementById('activity-log').innerHTML = '<p style="color: red;">Ошибка загрузки данных с сервера.</p>';
+                document.getElementById('balance').innerText = "Ошибка";
+                document.getElementById('activity-log').innerHTML = '<p style="color: red;">Не удалось получить данные с сервера ' + API_URL + '</p>';
             }
         });
 
