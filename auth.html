@@ -25,8 +25,10 @@
     </div>
 
     <script>
-        // АДРЕС ТВОЕГО СЕРВЕРА НА RENDER
-        const API_URL = "https://energomarket-e1k3.onrender.com";
+        // АВТОМАТИЧЕСКИЙ ВЫБОР АДРЕСА СЕРВЕРА
+        const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+            ? "http://127.0.0.1:10000" 
+            : "https://energomarket-e1k3.onrender.com";
 
         const authForm = document.getElementById('authForm');
         const toggleLink = document.getElementById('toggleAuth');
@@ -34,7 +36,6 @@
         const submitBtn = document.getElementById('submitBtn');
         let isLogin = true;
 
-        // Переключение между Входом и Регистрацией
         toggleLink.onclick = () => {
             isLogin = !isLogin;
             authTitle.innerText = isLogin ? "Вход в ЭнергоМаркет" : "Регистрация";
@@ -48,47 +49,32 @@
             const usernameValue = document.getElementById('username').value;
             const passwordValue = document.getElementById('password').value;
 
-            if (!isLogin) {
-                // РЕГИСТРАЦИЯ
-                try {
-                    const response = await fetch(`${API_URL}/register`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: usernameValue, password: passwordValue })
-                    });
+            const endpoint = isLogin ? '/login' : '/register';
+            
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameValue, password: passwordValue })
+                });
 
-                    if (response.ok) {
-                        alert('Регистрация прошла успешно! Теперь войдите.');
-                        isLogin = true;
-                        toggleLink.click();
-                    } else {
-                        const result = await response.json();
-                        alert('Ошибка регистрации: ' + result.error);
-                    }
-                } catch (error) {
-                    alert('Не удалось связаться с сервером.');
-                }
-            } else {
-                // ВХОД С ПРОВЕРКОЙ
-                try {
-                    const response = await fetch(`${API_URL}/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: usernameValue, password: passwordValue })
-                    });
+                const result = await response.json();
 
-                    const result = await response.json();
-
-                    if (response.ok) {
+                if (response.ok) {
+                    if (isLogin) {
                         localStorage.setItem('currentUser', usernameValue);
                         alert('Добро пожаловать, ' + usernameValue + '!');
                         window.location.href = 'profile.html';
                     } else {
-                        alert('Ошибка входа: ' + result.error);
+                        alert('Регистрация прошла успешно! Теперь войдите.');
+                        isLogin = true;
+                        toggleLink.click();
                     }
-                } catch (error) {
-                    alert('Ошибка: удаленный сервер не отвечает.');
+                } else {
+                    alert('Ошибка: ' + result.error);
                 }
+            } catch (error) {
+                alert('Не удалось связаться с сервером по адресу: ' + API_URL);
             }
         };
     </script>
