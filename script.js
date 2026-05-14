@@ -1,4 +1,6 @@
-const API_URL = "https://energomarket-e1k3.onrender.com";
+const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+    ? "http://127.0.0.1:10000" 
+    : "https://energomarket-e1k3.onrender.com";
 
 const products = [
     { id: 1, name: "Шуруповерт Bosch PSR 1200", price: 4500, category: "Инструменты", img: "https://cdn.vseinstrumenti.ru/images/goods/stroitelnyj-instrument/shurupoverty/516977/2400x1600/51157269.jpg" },
