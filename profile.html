@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Личный кабинет — ЭнергоМаркет</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .profile-wrapper { max-width: 900px; margin: 50px auto; display: grid; grid-template-columns: 250px 1fr; gap: 20px; font-family: sans-serif; }
+        .sidebar { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: fit-content; }
+        .main-content { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .user-info h2 { margin-top: 0; color: #333; }
+        .stat-card { background: #f8f9fa; border-left: 5px solid #0056b3; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .stat-card h4 { margin: 0 0 5px 0; color: #666; font-size: 14px; }
+        .stat-card p { margin: 0; font-size: 20px; font-weight: bold; color: #0056b3; }
+        .logout-btn { color: red; cursor: pointer; text-decoration: underline; display: block; margin-top: 20px; border: none; background: none; width: 100%; text-align: left; }
+        .nav-link { display: block; padding: 10px 0; color: #333; text-decoration: none; border-bottom: 1px solid #eee; }
+        .nav-link:hover { color: #0056b3; }
+        
+        /* Стили для строк заказов */
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        .order-item:last-child { border-bottom: none; }
+        .order-date { color: #999; font-size: 0.85rem; }
+    </style>
+</head>
+<body style="background: #f4f7f6;">
+
+    <div class="profile-wrapper">
+    <!-- Боковая панель -->
+        <div class="sidebar">
+            <h3 id="side-username" style="border-bottom: 2px solid #054181; padding-bottom: 10px; margin-bottom: 15px;">Загрузка...</h3>
+            <nav>
+                <a href="index.html" class="nav-link">🏠 Главная магазина</a>
+                <a href="#" class="nav-link">💳 Способы оплаты</a>
+                <button class="logout-btn" onclick="logout()">Выйти из системы</button>
+            </nav>
+        </div>
+        <!-- Основная часть -->
+        <div class="main-content">
+            <div class="user-info">
+                <h2>Добро пожаловать, <span id="display-name">Гость</span>!</h2>
+                <p style="color: #888;">Ваш персональный раздел управления заказами и счетом.</p>
+                <hr>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="stat-card">
+                        <h4>Текущий баланс</h4>
+                        <p id="balance">0 ₽</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Мои покупки</h4>
+                        <p id="orders-count">0 товаров</p>
+                    </div>
+                </div>
+
+                <h3>История покупок</h3>
+                <div id="activity-log">
+                    <p style="color: #666; font-style: italic;">Загрузка истории...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = localStorage.getItem('currentUser');
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            // Устанавливаем имя сразу
+            document.getElementById('side-username').innerText = user;
+            document.getElementById('display-name').innerText = user;
+
+            try {
+                // Запрос к твоему Python серверу
+                const response = await fetch(`http://127.0.0.1:5000/get_profile?username=${user}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Обновляем баланс
+                    document.getElementById('balance').innerText =
+
+
+`${data.balance.toLocaleString()} ₽`;
+                    
+                    // Обновляем количество покупок
+                    document.getElementById('orders-count').innerText = `${data.orders.length} шт.`;
+
+                    // Рендерим список заказов
+                    const log = document.getElementById('activity-log');
+                    if (data.orders.length === 0) {
+                        log.innerHTML = '<p style="color: #666; font-style: italic;">У вас пока нет совершенных покупок.</p>';
+                    } else {
+                        log.innerHTML = data.orders.map(order => `
+                            <div class="order-item">
+                                <div>
+                                    <strong>${order.name}</strong>
+
+                                    <span class="order-date">${new Date(order.date).toLocaleString('ru-RU')}</span>
+                                </div>
+                                <div style="color: #28a745; font-weight: bold;">
+                                    ${order.price.toLocaleString()} ₽
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error("Ошибка:", error);
+                document.getElementById('activity-log').innerHTML = '<p style="color: red;">Ошибка загрузки данных с сервера.</p>';
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

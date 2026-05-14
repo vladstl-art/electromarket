@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Избранное — EnergoMarket</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- То самое уведомление (на случай, если удалишь товар прямо здесь) -->
+    <div id="fav-notification" class="fav-notification-hidden">
+        <span class="fav-icon-check">✓</span>
+        <span id="fav-notification-text">Товар удален из избранного</span>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo-link">
+                <img src="logo.png" alt="EnergoMarket" class="logo-img">
+            </a>
+            <div class="header-right">
+                <a href="index.html" style="color: white; text-decoration: none; margin-right: 20px;">На главную</a>
+                <a href="auth.html" id="user-profile" class="profile-link">
+                    <span id="user-name-display">Войти</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding: 20px;">
+        <h1 style="color: #054181; margin-bottom: 20px;"> ⭐ Моё избранное</h1>
+        
+        <!-- Сетка для избранных товаров -->
+        <div id="favorites-grid" class="grid"></div>
+        
+        <!-- Сообщение, если пусто -->
+        <div id="empty-favorites" style="display:none; text-align: center; margin-top: 50px;">
+            <p style="font-size: 1.2rem; color: #666;">В списке избранного пока ничего нет.</p>
+            <a href="index.html" style="display: inline-block; margin-top: 15px; color: #054181; font-weight: bold;">Перейти к покупкам</a>
+        </div>
+    </main>
+
+    <!-- Подключаем те же скрипты -->
+    <script src="script.js"></script>
+    <script>
+        // Специальная логика только для этой страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFavorites();
+            
+            // Проверка юзера для шапки
+            const user = localStorage.getItem('currentUser');
+            if (user) {
+                document.getElementById('user-name-display').innerText = user;
+                document.getElementById('user-profile').href = 'profile.html';
+            }
+        });
+
+        function renderFavorites() {
+            const favoritesGrid = document.getElementById('favorites-grid');
+            const emptyMsg = document.getElementById('empty-favorites');
+            const favoriteIds = JSON.parse(localStorage.getItem('userFavorites')) || [];
+
+            // Фильтруем основной массив products из script.js
+            const favoriteProducts = products.filter(p => favoriteIds.includes(p.id));
+
+            if (favoriteProducts.length === 0) {
+                favoritesGrid.innerHTML = '';
+                emptyMsg.style.display = 'block';
+                return;
+            }
+
+            emptyMsg.style.display = 'none';
+            
+            // Используем ту же верстку, что и на главной
+            favoritesGrid.innerHTML = favoriteProducts.map(item => `
+                <div class="product-card">
+                    <div style="text-align: right; margin-bottom: -25px; position: relative; z-index: 2;">
+                        <span onclick="removeFromFavs(${item.id})" class="fav-star active" style="cursor: pointer; font-size: 1.6rem; color: #ffc107;">
+                            ★
+                        </span>
+                    </div>
+                    <div class="product-image" style="height: 180px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px;">
+                        <img src="${item.img}" alt="${item.name}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    </div>
+                    <h3 style="font-size: 1rem; height: 2.5rem; overflow: hidden;">${item.name}</h3>
+                    <p style="color: #666; font-size: 0.8rem;">${item.category}</p>
+                    <p style="color: #054181; font-weight: bold; font-size: 1.2rem;">${item.price.toLocaleString()} ₽</p>
+                    <button type="button" onclick="makePurchase(event, '${item.name}', ${item.price})" style="background: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; width: 100%; cursor: pointer; font-weight: bold;">Купить</button>
+                </div>
+            `).join('');
+        }
+
+        // Функция удаления конкретно для этой страницы, чтобы сразу обновлять список
+        function removeFromFavs(id) {
+            toggleFavorite(id); // Вызываем основную функцию из script.js (она сохранит и покажет плашку)
+            renderFavorites();  // Сразу перерисовываем страницу, чтобы товар исчез
+        }
+    </script>
+</body>
+</html>

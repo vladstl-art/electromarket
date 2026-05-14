@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnergoMarket — Электротехника</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <div id="fav-notification" class="fav-notification-hidden">
+    <span class="fav-icon-check">✓</span>
+    <span id="fav-notification-text">Товар добавлен в избранное</span>
+</div>
+  <header>
+    <div class="header-content">
+        <a href="index.html" class="logo-link">
+            <img src="logo.png" alt="EnergoMarket" class="logo-img">
+        </a>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Поиск инструментов...">
+        </div>
+<div class="header-right">
+    <!-- Кнопка Избранное -->
+    <a href="favorites.html" class="favorites-link-header" title="Избранное">
+        <span class="header-fav-star">★</span>
+        <span class="header-fav-text">Избранное</span>
+    </a>
+
+    <!-- Ссылка теперь ведет в профиль, если вошел -->
+    <a href="auth.html" id="user-profile" class="profile-link">
+        <span id="user-name-display">Войти</span>
+    </a>
+    
+    <a href="cart.html" class="cart-info">
+        Корзина: <span id="cart-count">0</span>
+    </a>
+</div>
+    </div>
+</header>
+
+<nav class="categories-nav">
+    <div class="category-item" data-category="все"><span>Все товары</span></div>
+    <div class="category-item" data-category="Инструменты"><span>Инструменты</span></div>
+    <div class="category-item" data-category="Тестеры"><span>Тестеры</span></div>
+    <div class="category-item" data-category="Расходники"><span>Расходники</span></div>
+    <div class="category-item" data-category="Электроника"><span>Электроника</span></div>
+</nav>
+
+<main>
+    <div id="product-grid" class="grid"></div>
+</main>
+
+<script src="script.js"></script>
+
+<script>
+    // Проверка входа при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        const user = localStorage.getItem('currentUser');
+        const nameDisplay = document.getElementById('user-name-display');
+        const profileLink = document.getElementById('user-profile');
+        
+        if (user && nameDisplay) {
+            nameDisplay.innerText = user; // Показываем имя пользователя
+            profileLink.href = 'profile.html'; // Меняем ссылку на кабинет
+        }
+    });
+</script>
+<!-- Модальное окно подтверждения -->
+<div id="custom-confirm" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:25px; border-radius:15px; max-width:400px; width:90%; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <h3 id="confirm-title" style="margin-top:0; color:#054181;">Подтверждение</h3>
+        <p id="confirm-message" style="color:#555; line-height:1.5;"></p>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button id="confirm-cancel" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:8px; cursor:pointer; background:#f8f9fa;">Отмена</button>
+            <button id="confirm-ok" style="flex:1; padding:12px; border:none; border-radius:8px; cursor:pointer; background:#28a745; color:white; font-weight:bold;">Купить</button>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для быстрых уведомлений (Toast) -->
+<div id="toast-container" style="position:fixed; bottom:20px; right:20px; z-index:1001;"></div>
+</body>
+</html>

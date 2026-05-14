@@ -1,0 +1,237 @@
+/* 1. ОБЩИЕ СТИЛИ И ФОН */
+body {
+    background: url('background2.jpg') no-repeat center center fixed; 
+    background-size: cover;
+    margin: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #333;
+    min-height: 100vh; /* Чтобы фон растягивался, даже если товаров мало */
+}
+
+header {
+    background-color: #034383;
+    color: white;
+    height: 75px; 
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 2. ПОИСК, ПРОФИЛЬ И КОРЗИНА */
+.search-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    margin: 0 20px;
+}
+
+#searchInput {
+    padding: 10px 20px;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.header-right {
+    flex-basis: 250px; /* Должно совпадать с flex-basis у .logo-link */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Прижимает кнопки вправо */
+    gap: 15px;
+}
+
+
+.profile-link {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 300px; /* Делаем закругленной, как корзину */
+    transition: 0.3s;
+    background-color: #ff9900; /* Яркий оранжевый */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.profile-link:hover {
+    background-color: #e68a00; /* Темно-оранжевый при наведении */
+    transform: translateY(-1px);
+}
+
+.cart-info {
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 300px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+    white-space: nowrap;
+}
+
+.cart-info:hover {
+    background-color: #218838;
+}
+
+/* 3. КАТЕГОРИИ */
+.categories-nav {
+    display: flex;
+    justify-content: center;
+    background: white;
+    padding: 15px 0;
+    border-bottom: 1px solid #ddd;
+    gap: 30px;
+}
+
+.category-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.3s;
+    color: #555;
+}
+
+.category-item:hover, .category-item.active {
+    color: #034383;
+}
+
+/* 4. СЕТКА ТОВАРОВ (БЕЛЫЕ КАРТОЧКИ) */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.product-card {
+    background: white; /* Белый фон карточки на сером фоне body */
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: none; /* Убираем скучную рамку */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Мягкая тень */
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* 5. ЛОГОТИП И МОБИЛЬНОСТЬ */
+.logo-img {
+    height: 76px; /* Немного уменьшил, чтобы не впритык к краям 75px хедера */
+    width: auto;
+    object-fit: contain;
+    transition: 0.3s;
+}
+.logo-link {
+    flex-basis: 250px; /* Задает ширину левой части */
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .logo-img {
+        height: 40px;
+    }
+    .header-content {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+    header { 
+        height: auto; 
+    }
+}
+/* Настройка уведомления об избранном */
+#fav-notification {
+    position: fixed; /* Это заставит плашку летать поверх сайта */
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Центрируем по горизонтали */
+    background-color: #2b2b2b; /* Темный фон */
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999; /* Чтобы была выше всех элементов */
+    font-family: sans-serif;
+    font-size: 14px;
+    transition: all 0.4s ease; /* Плавность появления и исчезновения */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Класс для скрытого состояния */
+.fav-notification-hidden {
+    opacity: 0;
+    top: -60px !important; /* Уводим за верхнюю границу экрана */
+    pointer-events: none;
+}
+
+/* Белый кружок с галочкой */
+.fav-icon-check {
+    background: white;
+    color: black;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+/* Кнопка избранного в шапке */
+.favorites-link-header {
+    display: flex;
+    flex-direction: column; /* Текст под звездочкой */
+    align-items: center;
+    text-decoration: none;
+    color: white; /* Цвет текста в шапке */
+    margin-right: 20px;
+    transition: transform 0.2s ease;
+}
+
+.favorites-link-header:hover {
+    transform: scale(1.05); /* Легкое увеличение при наведении */
+}
+
+.header-fav-star {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.header-fav-text {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Опционально: если хочешь, чтобы при наведении звездочка подсвечивалась */
+.favorites-link-header:hover .header-fav-star {
+    color: #ffc107;
+}

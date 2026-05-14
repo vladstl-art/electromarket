@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход — ЭнергоМаркет</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; font-family: sans-serif; }
+        .auth-form input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .auth-btn { width: 100%; padding: 12px; background: #0056b3; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
+        .auth-btn:hover { background: #004494; }
+        .toggle-link { margin-top: 15px; display: block; color: #0056b3; cursor: pointer; text-decoration: underline; font-size: 14px; }
+    </style>
+</head>
+<body style="background: #f4f4f4;">
+
+    <div class="auth-container">
+        <h2 id="auth-title">Вход в ЭнергоМаркет</h2>
+        <form class="auth-form" id="authForm">
+            <input type="text" id="username" placeholder="Имя пользователя" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit" class="auth-btn" id="submitBtn">Войти</button>
+        </form>
+        <span class="toggle-link" id="toggleAuth">Нет аккаунта? Зарегистрироваться</span>
+    </div>
+
+    <script>
+        const authForm = document.getElementById('authForm');
+        const toggleLink = document.getElementById('toggleAuth');
+        const authTitle = document.getElementById('auth-title');
+        const submitBtn = document.getElementById('submitBtn');
+        let isLogin = true;
+
+        // Переключение между Входом и Регистрацией
+        toggleLink.onclick = () => {
+            isLogin = !isLogin;
+            authTitle.innerText = isLogin ? "Вход в ЭнергоМаркет" : "Регистрация";
+            submitBtn.innerText = isLogin ? "Войти" : "Создать аккаунт";
+            toggleLink.innerText = isLogin ? "Нет аккаунта? Зарегистрироваться" : "Уже есть аккаунт? Войти";
+        };
+
+        authForm.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const usernameValue = document.getElementById('username').value;
+            const passwordValue = document.getElementById('password').value;
+
+            if (!isLogin) {
+                // РЕГИСТРАЦИЯ
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: usernameValue, password: passwordValue })
+                    });
+
+                    if (response.ok) {
+                        alert('Регистрация прошла успешно! Теперь войдите.');
+                        isLogin = true;
+                        toggleLink.click();
+                    } else {
+                        const result = await response.json();
+                        alert('Ошибка регистрации: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Не удалось связаться с сервером. Запусти app.py!');
+                }
+            } else {
+                // ВХОД С ПРОВЕРКОЙ
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: usernameValue, password: passwordValue })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        localStorage.setItem('currentUser', usernameValue);
+                        alert('Добро пожаловать, ' + usernameValue + '!');
+                        window.location.href = 'profile.html';
+
+
+} else {
+                        alert('Ошибка входа: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Ошибка: сервер Python не отвечает.');
+                }
+            }
+        };
+    </script>
+</body>
+</html>
