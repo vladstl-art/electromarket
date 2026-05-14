@@ -1,6 +1,10 @@
 import sqlite3
-from flask import Flask, request, jsonify
+from flask import send_from_directory
 from flask_cors import CORS
+
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
 
 app = Flask(__name__)
 CORS(app)
