@@ -76,33 +76,33 @@
             document.getElementById('display-name').innerText = user;
 
             try {
-                // Обращаемся к Render вместо локального сервера
                 const response = await fetch(`${API_URL}/get_profile?username=${user}`);
                 const data = await response.json();
 
                 if (response.ok) {
+                    // Баланс из твоего app.py
                     document.getElementById('balance').innerText = `${data.balance.toLocaleString()} ₽`;
                     
-                    // В твоем Python коде список покупок называется 'history'
-                    const history = data.history || [];
-                    document.getElementById('orders-count').innerText = `${history.length} шт.`;
+                    // Список покупок (в app.py это 'orders')
+                    const orders = data.orders || [];
+                    document.getElementById('orders-count').innerText = `${orders.length} шт.`;
 
                     const log = document.getElementById('activity-log');
-                    if (history.length === 0) {
+                    if (orders.length === 0) {
                         log.innerHTML = '<p style="color: #666; font-style: italic;">У вас пока нет совершенных покупок.</p>';
                     } else {
-                        // Используем 'item_name' и 'price', как в твоей базе данных
-                        log.innerHTML = history.map(order => `
+                        // Используем 'name' (как в строке 105 твоего app.py)
+                        log.innerHTML = orders.map(order => `
                             <div class="order-item">
                                 <div>
-                                    <strong>${order.item_name}</strong>
+                                    <strong>${order.name}</strong>
                                     <span class="order-date">${new Date(order.date).toLocaleString('ru-RU')}</span>
                                 </div>
                                 <div style="color: #28a745; font-weight: bold;">
                                     ${order.price.toLocaleString()} ₽
                                 </div>
                             </div>
-                        `).reverse().join(''); // Реверс, чтобы новые покупки были сверху
+                        `).join(''); // Убрал reverse, так как в app.py уже есть ORDER BY date DESC
                     }
                 }
             } catch (error) {
