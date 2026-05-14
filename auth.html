@@ -25,6 +25,9 @@
     </div>
 
     <script>
+        // АДРЕС ТВОЕГО СЕРВЕРА НА RENDER
+        const API_URL = "https://energomarket-e1k3.onrender.com";
+
         const authForm = document.getElementById('authForm');
         const toggleLink = document.getElementById('toggleAuth');
         const authTitle = document.getElementById('auth-title');
@@ -48,7 +51,7 @@
             if (!isLogin) {
                 // РЕГИСТРАЦИЯ
                 try {
-                    const response = await fetch('http://127.0.0.1:5000/register', {
+                    const response = await fetch(`${API_URL}/register`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username: usernameValue, password: passwordValue })
@@ -63,12 +66,12 @@
                         alert('Ошибка регистрации: ' + result.error);
                     }
                 } catch (error) {
-                    alert('Не удалось связаться с сервером. Запусти app.py!');
+                    alert('Не удалось связаться с сервером.');
                 }
             } else {
                 // ВХОД С ПРОВЕРКОЙ
                 try {
-                    const response = await fetch('http://127.0.0.1:5000/login', {
+                    const response = await fetch(`${API_URL}/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username: usernameValue, password: passwordValue })
@@ -80,13 +83,11 @@
                         localStorage.setItem('currentUser', usernameValue);
                         alert('Добро пожаловать, ' + usernameValue + '!');
                         window.location.href = 'profile.html';
-
-
-} else {
+                    } else {
                         alert('Ошибка входа: ' + result.error);
                     }
                 } catch (error) {
-                    alert('Ошибка: сервер Python не отвечает.');
+                    alert('Ошибка: удаленный сервер не отвечает.');
                 }
             }
         };
