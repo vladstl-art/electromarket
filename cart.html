@@ -11,6 +11,7 @@
         .cart-item { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee; }
         .cart-item img { width: 80px; height: 80px; object-fit: contain; }
         .checkout-btn { background: #78be20; color: white; border: none; padding: 15px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
         .remove-btn { color: #ff4d4d; cursor: pointer; font-size: 1.2rem; background: none; border: none; }
     </style>
 </head>
@@ -40,11 +41,17 @@
                 <span>Итого:</span>
                 <span id="total-price">0 ₽</span>
             </div>
-            <button class="checkout-btn">ОФОРМИТЬ ЗАКАЗ</button>
+            <!-- Добавили ID и onclick для кнопки -->
+            <button id="checkout-button" class="checkout-btn" onclick="processCheckout()">ОФОРМИТЬ ЗАКАЗ</button>
         </div>
     </div>
 
     <script>
+        // УМНОЕ ОПРЕДЕЛЕНИЕ АДРЕСА
+        const API_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+            ? "http://127.0.0.1:10000" 
+            : "https://energomarket-e1k3.onrender.com";
+
         function renderCart() {
             const cartItems = JSON.parse(localStorage.getItem('energoCart')) || [];
             const list = document.getElementById('cart-items-list');
@@ -53,9 +60,13 @@
 
             if (cartItems.length === 0) {
                 list.innerHTML = "<h4>Корзина пуста</h4>";
+                totalItemsElem.innerText = "0";
+                totalPriceElem.innerText = "0 ₽";
+                document.getElementById('checkout-button').disabled = true;
                 return;
             }
 
+            document.getElementById('checkout-button').disabled = false;
             let totalSum = 0;
             list.innerHTML = cartItems.map((item, index) => {
                 totalSum += item.price;
@@ -66,14 +77,14 @@
                             <strong>${item.name}</strong>
                             <p style="color: #666; font-size: 0.8rem;">Код: ${item.id}</p>
                         </div>
-                        <div style="flex: 1; text-align: center; font-weight: bold;">${item.price} ₽</div>
+                        <div style="flex: 1; text-align: center; font-weight: bold;">${item.price.toLocaleString()} ₽</div>
                         <button class="remove-btn" onclick="removeFromCart(${index})">×</button>
                     </div>
                 `;
             }).join('');
 
             totalItemsElem.innerText = cartItems.length;
-            totalPriceElem.innerText = totalSum + " ₽";
+            totalPriceElem.innerText = totalSum.toLocaleString() + " ₽";
         }
 
         window.removeFromCart = function(index) {
@@ -83,10 +94,68 @@
             renderCart();
         }
 
+        // ФУНКЦИЯ ОФОРМЛЕНИЯ ЗАКАЗА
+        async function processCheckout() {
+            const username = localStorage.getItem('currentUser');
+            const cartItems = JSON.parse(localStorage.getItem('energoCart')) || [];
+
+            if (!username) {
+                alert("Пожалуйста, войдите в аккаунт для оформления заказа.");
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            if (!confirm(`Оформить заказ на сумму ${document.getElementById('total-price').innerText}?`)) return;
+
+            const btn = document.getElementById('checkout-button');
+            btn.disabled = true;
+            btn.innerText = "ОБРАБОТКА...";
+
+            let successCount = 0;
+
+            // Проходим по каждому товару и отправляем запрос на сервер (как в script.js)
+            for (const item of cartItems) {
+                try {
+                    const response = await fetch(`${API_URL}/buy`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            username: username, 
+                            price: item.price, 
+                            itemName: item.name 
+                        })
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        const err = await response.json();
+                        alert(`Ошибка при покупке "${item.name}": ${err.error}`);
+                        break; // Останавливаем, если деньги кончились
+                    }
+                } catch (e) {
+                    alert("Ошибка связи с сервером");
+                    break;
+                }
+            }
+
+            if (successCount > 0) {
+                alert(`Успешно оплачено товаров: ${successCount}`);
+                // Очищаем корзину только для купленных товаров
+                const remaining = cartItems.slice(successCount);
+                localStorage.setItem('energoCart', JSON.stringify(remaining));
+                renderCart();
+                
+                if (remaining.length === 0) {
+                    setTimeout(() => { window.location.href = 'profile.html'; }, 500);
+                }
+            }
+            
+            btn.disabled = false;
+            btn.innerText = "ОФОРМИТЬ ЗАКАЗ";
+        }
+
         renderCart();
     </script>
 </body>
 </html>
-
-
-
