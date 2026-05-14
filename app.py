@@ -8,8 +8,8 @@ CORS(app)
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
-    
-    @app.route('/<path:path>')
+
+@app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('.', path)
 
