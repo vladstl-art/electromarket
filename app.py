@@ -8,6 +8,10 @@ CORS(app)
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
+    
+    @app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory('.', path)
 
 # Инициализация базы данных: создаем таблицы, если их нет
 def init_db():
