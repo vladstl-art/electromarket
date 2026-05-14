@@ -1,3 +1,5 @@
+const API_URL = "https://energomarket-e1k3.onrender.com";
+
 const products = [
     { id: 1, name: "Шуруповерт Bosch PSR 1200", price: 4500, category: "Инструменты", img: "https://cdn.vseinstrumenti.ru/images/goods/stroitelnyj-instrument/shurupoverty/516977/2400x1600/51157269.jpg" },
     { id: 2, name: "Дрель ударная Makita", price: 5200, category: "Инструменты", img: "https://sun9-58.userapi.com/s/v1/ig2/tV5uYqf53Sh6CmOiAqcxA3Cn9lj_94SAjjVsFXxp7HpvNfXDWhoUMlkQ1JGPDSp8zcBPwJzUZtxKs_Kj3GlWMARN.jpg?quality=95&as=32x29,48x43,72x65,108x97,160x144,240x216,360x324,480x432,540x486,560x504&from=bu&u=t1eLuqKKcjaP3HxhwV7sCkOVK9kDB5GzXxlmgafbQhc&cs=560x0" },
@@ -130,7 +132,7 @@ async function makePurchase(event, itemName, price) {
 
     if (confirmed) {
         try {
-            const response = await fetch('http://127.0.0.1:5000/buy', {
+            const response = await fetch(${API_URL}/buy, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, price, itemName })
