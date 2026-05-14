@@ -132,7 +132,8 @@ async function makePurchase(event, itemName, price) {
 
     if (confirmed) {
         try {
-            const response = await fetch(${API_URL}/buy, {
+            // ИСПРАВЛЕННАЯ СТРОКА С ОБРАТНЫМИ КАВЫЧКАМИ:
+            const response = await fetch(`${API_URL}/buy`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, price, itemName })
@@ -148,6 +149,7 @@ async function makePurchase(event, itemName, price) {
         }
     }
 }
+
 
 // 3. ИЗБРАННОЕ
 function toggleFavorite(productId) {
