@@ -1,13 +1,13 @@
 import sqlite3
-from flask import send_from_directory
+from flask import send_from_directory, Flask, jsonify, request
 from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
 
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
-
-app = Flask(__name__)
-CORS(app)
 
 # Инициализация базы данных: создаем таблицы, если их нет
 def init_db():
