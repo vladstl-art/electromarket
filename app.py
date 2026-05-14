@@ -97,15 +97,28 @@ def get_profile():
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT balance FROM users WHERE username=?", (username,))
-    balance_row = cursor.fetchone()
-    balance = balance_row[0] if balance_row else 0
     
+    # Ищем баланс
+    cursor.execute("SELECT balance FROM users WHERE username=?", (username,))
+    row = cursor.fetchone()
+    
+    # Если юзер не найден в БД, возвращаем ошибку, а не просто 0
+    if row is None:
+        conn.close()
+        return jsonify({"error": "Пользователь не найден"}), 404
+
+    balance = row[0]
+    
+    # Тянем историю
     cursor.execute("SELECT item_name, price, date FROM orders WHERE username=? ORDER BY date DESC", (username,))
-    orders = [{"name": row[0], "price": row[1], "date": row[2]} for row in cursor.fetchall()]
+    orders = [{"name": r[0], "price": r[1], "date": r[2]} for r in cursor.fetchall()]
     
     conn.close()
-    return jsonify({"balance": balance, "orders": orders})
+    return jsonify({
+        "balance": float(balance),
+        "orders": orders
+    })
+
 
 @app.route('/register', methods=['POST'])
 def register():
